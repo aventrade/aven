@@ -1,0 +1,64 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Aven banner</title>
+<!-- The repo banner and social preview, rendered from the site's own field renderer. ?w=1600&h=560 for the README
+     banner, ?w=1280&h=640&social for the GitHub social preview. dev/media-banner.mjs screenshots it. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+* { margin: 0; box-sizing: border-box; }
+html, body { background: #000; color: #fff; overflow: hidden; }
+#bg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.shade { position: absolute; inset: 0; background: linear-gradient(90deg, #000 0%, rgba(0,0,0,.92) 34%, rgba(0,0,0,.35) 62%, rgba(0,0,0,0) 100%); }
+.box { position: absolute; left: 6%; top: 50%; transform: translateY(-50%); }
+.mark { display: flex; align-items: center; gap: 22px; margin-bottom: 26px; }
+.mark svg { width: 96px; height: auto; }
+.mark b { font: 900 76px/1 Archivo; font-stretch: 125%; letter-spacing: .08em; }
+h1 { font: 900 50px/.98 Archivo; font-stretch: 125%; text-transform: uppercase; letter-spacing: -.005em; }
+h1 .out { color: transparent; -webkit-text-stroke: 1.6px #fff; }
+p { margin-top: 22px; font: 500 15px/1.7 'IBM Plex Mono'; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.72); }
+.url { position: absolute; right: 4%; bottom: 7%; font: 600 16px 'IBM Plex Mono'; letter-spacing: .18em; text-transform: uppercase; padding: 10px 14px; border: 1px solid rgba(255,255,255,.5); background: #000; }
+.corner { position: absolute; width: 26px; height: 26px; border: 0 solid #fff; }
+.c1 { left: 22px; top: 22px; border-left-width: 3px; border-top-width: 3px; }
+.c2 { right: 22px; bottom: 22px; border-right-width: 3px; border-bottom-width: 3px; }
+.tick { position: absolute; right: 4%; bottom: 20%; font: 500 13px 'IBM Plex Mono'; letter-spacing: .14em; color: rgba(255,255,255,.75); text-align: right; line-height: 1.9; }
+body.social h1 { font-size: 46px; }
+body.social .mark b { font-size: 64px; }
+</style>
+<body>
+<canvas id="bg"></canvas>
+<div class="shade"></div>
+<div class="box">
+  <div class="mark"><svg viewBox="0 0 220 180"><path fill="#fff" d="M113 0 214 180H167L86 44Z"/><path fill="#fff" d="M0 180 42 104H104L60 180Z"/></svg><b>AVEN</b></div>
+  <h1>Long or short.<br><span class="out">On paper.</span></h1>
+  <p>Paper perpetuals for Robinhood Chain traders<br>Live mark · real funding · real liquidations</p>
+</div>
+<div class="tick" id="tick"></div>
+<div class="url">aventrade.app</div>
+<div class="corner c1"></div><div class="corner c2"></div>
+<script type="module">
+import { createField } from '/assets/field.js';
+const q = new URLSearchParams(location.search);
+const W = +(q.get('w') || 1600), H = +(q.get('h') || 560);
+document.documentElement.style.width = document.body.style.width = W + 'px';
+document.documentElement.style.height = document.body.style.height = H + 'px';
+if (q.has('social')) document.body.classList.add('social');
+const c = document.getElementById('bg');
+const field = createField(c, { manual: true, dpr: 1 });
+field.resize();
+const post = b => fetch('https://api.hyperliquid.xyz/info', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b) }).then(r => r.json());
+const [candles, [meta, ctx]] = await Promise.all([
+  post({ type: 'candleSnapshot', req: { coin: 'BTC', interval: '1h', startTime: Date.now() - 120 * 3600e3, endTime: Date.now() } }),
+  post({ type: 'metaAndAssetCtxs' }),
+]);
+field.setSeries(candles.map(k => +k.c));
+const i = meta.universe.findIndex(u => u.name === 'BTC');
+const mk = +ctx[i].markPx;
+field.setLabel('BTC / aUSD', `BTC ${mk.toLocaleString('en-US', { maximumFractionDigits: 1 })}`);
+const ei = meta.universe.findIndex(u => u.name === 'ETH');
+field.setLabel('ETH / aUSD', `ETH ${(+ctx[ei].markPx).toLocaleString('en-US', { maximumFractionDigits: 2 })}`);
+document.getElementById('tick').innerHTML = `BTC-PERP ${mk.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}<br>FUNDING ${(+ctx[i].funding * 100).toPrecision(2)}% / H`;
+await document.fonts.ready;
+field.draw(4.2, 0.2);
+window.ready = true;
+</script>
+</body>
