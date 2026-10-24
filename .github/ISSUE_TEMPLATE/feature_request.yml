@@ -1,0 +1,11 @@
+name: Feature request
+description: An idea for Aven
+labels: ["idea"]
+body:
+  - type: textarea
+    id: question
+    attributes: { label: What question are you trying to answer as a trader?, description: "Aven's tools answer a real question with real data. Start from the question." }
+    validations: { required: true }
+  - type: textarea
+    id: idea
+    attributes: { label: What would help, description: "And where the data for it would come from, if you know" }

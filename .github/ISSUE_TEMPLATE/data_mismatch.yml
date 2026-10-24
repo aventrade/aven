@@ -1,0 +1,20 @@
+name: Data mismatch
+description: A price, funding rate, pool quote or liquidation on Aven doesn't match its source
+labels: ["data"]
+body:
+  - type: input
+    id: market
+    attributes: { label: Market, placeholder: "BTC, NVDA, GOLD…" }
+    validations: { required: true }
+  - type: input
+    id: when
+    attributes: { label: When, description: "Date and time, with your time zone", placeholder: "24 Oct 2026, 15:42 WIB" }
+    validations: { required: true }
+  - type: textarea
+    id: aven
+    attributes: { label: What Aven showed, description: "The number and where it was: the bar, the ticket, a position, a receipt" }
+    validations: { required: true }
+  - type: textarea
+    id: source
+    attributes: { label: What the source showed, description: "Hyperliquid, the pool on DexScreener or GeckoTerminal, a block explorer. A link or screenshot helps." }
+    validations: { required: true }
