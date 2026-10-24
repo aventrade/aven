@@ -691,3 +691,7 @@ body.jmode .cmdhint { visibility: hidden; }
 .mw-copy { margin-left: auto; display: flex; align-items: center; gap: 8px; padding: 0 12px; }
 .mw-copy input { width: 90px; padding: 6px 8px; border: 1px solid var(--line2); font: 500 12px var(--mono); }
 @media (max-width: 900px) { .mw-grid { grid-template-columns: 1fr; } .mw-list { max-height: 300px; } .mw-up { text-align: left; } .mw-copy { padding: 6px 12px; } }
+
+.ghlink svg { display: block; }
+.top .ghlink + .xlink { margin-left: -4px; }
+@media (max-width: 900px) { .landing .top .ghlink, .docs-page .top .ghlink { display: none; } }
