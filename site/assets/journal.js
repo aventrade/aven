@@ -48,7 +48,7 @@ export function paint(full = true) {
   const k = [
     ['Account value', E.fmt(q.total), Math.abs(q.total - E.START) < 0.005 ? `even on ${E.fmt(E.START, 0)}` : `${E.signed(((q.total - E.START) / E.START) * 100)}% on ${E.fmt(E.START, 0)}`],
     ['Realised net', st.n ? E.signedOr(st.net, 'even') : 'nothing yet', st.n ? `${st.n} closed trade${st.n === 1 ? '' : 's'}` : 'close a trade to start the record'],
-    ['Win rate', st.n ? pct(st.winRate) : 'no trades yet', st.n ? `${st.wins} won · ${st.n - st.wins} lost` : 'counts every closed trade'],
+    ['Win rate', st.n ? pct(st.winRate) : 'no trades yet', st.n ? [st.wins ? `${st.wins} won` : 'none won', st.n - st.wins ? `${st.n - st.wins} lost` : 'none lost'].join(' · ') : 'counts every closed trade'],
     ['Profit factor', st.n ? (st.pf === Infinity ? 'no losers' : st.pf ? st.pf.toFixed(2) : 'no winners') : 'no trades yet', 'gross won ÷ gross lost'],
     ['Average win / loss', st.n ? `${st.wins ? E.fmt(st.avgWin, 0) : 'none'} / ${st.n - st.wins ? E.fmt(Math.abs(st.avgLoss), 0) : 'none'}` : 'no trades yet', 'aUSD per trade, after costs'],
     ['Liquidations', st.liqs ? String(st.liqs) : 'none', st.liqs ? `${pct(st.liqs / st.n)} of trades` : 'keep it that way'],

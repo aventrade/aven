@@ -22,3 +22,5 @@ dev/engine.test.mjs
 dev/away-stock.mjs
 dev/live-check.mjs
 dev/pick-card.mjs
+posts/
+referensi/
