@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trade · Aven</title>
+<meta name="description" content="Paper perpetuals on the real futures mark: funding, limit and stop orders, liquidations that happen even while you're away.">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/assets/aven.css">
+</head>
+<body class="app">
+<canvas id="field" aria-hidden="true" style="opacity:.5"></canvas>
+
+<header class="top">
+  <a class="brand" href="/"><img src="/assets/logo.svg" alt=""><b>AVEN</b></a>
+  <nav class="tabsnav" id="views"><button type="button" data-view="trade" class="on">Trade</button><button type="button" data-view="journal">Journal</button><button type="button" data-view="rewind">Rewind</button><button type="button" data-view="funding">Funding</button><button type="button" data-view="mirror">Mirror</button><a href="/docs/" class="docs-link">Docs</a></nav>
+  <button class="cmdhint" id="cmdOpen" type="button"><span class="mono">/</span> type a command</button>
+  <span class="lbl" id="feedState" style="margin-left:auto"><span class="live-dot"></span>connecting</span>
+  <a class="xlink" href="https://x.com/aven_trade" target="_blank" rel="noopener" aria-label="Aven on X">𝕏</a>
+</header>
+
+<div class="term">
+  <div class="t-list" id="list"></div>
+
+  <div class="t-bar">
+    <span class="sym" id="bSym">BTC</span>
+    <span class="px" id="bPx"></span>
+    <span class="kv"><span>24h</span><b class="chg" id="bChg"></b></span>
+    <span class="kv"><span id="bIdxL">Oracle</span><b id="bIdx"></b></span>
+    <span class="kv"><span id="bFundL">Funding 1h / next</span><b id="bFund"></b></span>
+    <span class="kv"><span id="bOiL">Open interest</span><b id="bOi"></b></span>
+    <span class="kv"><span>24h volume</span><b id="bVol"></b></span>
+    <span class="kv"><span>Max</span><b id="bMax"></b></span>
+  </div>
+
+  <div class="t-chart">
+    <div class="ivs" id="ivs"></div>
+    <div id="chart"></div>
+  </div>
+
+  <div class="t-pos">
+    <div class="tabs" id="tabs">
+      <button data-t="pos" class="on">Positions <span id="nPos"></span></button>
+      <button data-t="ord">Orders <span id="nOrd"></span></button>
+      <button data-t="fills">Fills</button>
+      <button data-t="radar">Whale tape <span id="nLiq"></span></button>
+    </div>
+    <div id="pos"></div>
+  </div>
+
+  <aside class="t-side">
+    <div class="blk">
+      <div class="acct">
+        <div class="tot"><span class="lbl" id="aRun">Run 1 · account value</span><b id="aTot"></b><span class="lbl" id="aRet"></span></div>
+        <div><span class="lbl">Free</span><b id="aFree"></b></div>
+        <div><span class="lbl">Margin in use</span><b id="aLock"></b></div>
+        <div><span class="lbl">Unrealised</span><b id="aUp"></b></div>
+        <div><span class="lbl">Held by orders</span><b id="aHeld"></b></div>
+      </div>
+    </div>
+
+    <form class="blk" id="ticket" autocomplete="off">
+      <div class="otype" id="otype"><button type="button" data-o="market" class="on">Market</button><button type="button" data-o="limit">Limit</button><button type="button" data-o="stop">Stop</button></div>
+      <div class="seg" id="side"><button type="button" data-side="long" class="on">▲ Long</button><button type="button" data-side="short">▼ Short</button></div>
+      <div class="field" id="priceRow" hidden><div class="lbl"><span id="priceLbl">Limit price</span><button type="button" class="linkish" id="useMark">use mark</button></div>
+        <div class="inp"><input id="price" type="number" step="any" inputmode="decimal"><span>aUSD</span></div></div>
+      <div class="field"><div class="lbl"><span>Margin</span><span id="freeHint"></span></div>
+        <div class="inp"><input id="margin" type="number" min="1" step="any" value="1000" inputmode="decimal"><span>aUSD</span></div>
+        <div class="pcts" id="pcts"><button type="button" data-p="10">10%</button><button type="button" data-p="25">25%</button><button type="button" data-p="50">50%</button><button type="button" data-p="100">Max</button></div>
+      </div>
+      <div class="field"><div class="lbl"><span>Leverage</span><span id="levOut">10x</span></div>
+        <input id="lev" type="range" min="1" max="50" step="1" value="10">
+        <div class="chips" id="levChips"></div></div>
+      <div class="field" id="tpslRow"><div class="lbl"><span>Take profit / stop loss</span><span>on mark</span></div>
+        <div class="tpsl"><div class="inp"><input id="tp" type="number" step="any" placeholder="TP" inputmode="decimal"></div>
+          <div class="inp"><input id="sl" type="number" step="any" placeholder="SL" inputmode="decimal"></div></div></div>
+      <label class="check"><input type="checkbox" id="reduce"> <span>Reduce only</span></label>
+      <div class="out" id="summary"></div>
+      <button class="go" id="go" type="submit">Long</button>
+      <div class="err" id="err" hidden></div>
+    </form>
+
+    <div class="blk">
+      <div class="lbl" style="margin-bottom:8px" id="bookL">Order book · Hyperliquid</div>
+      <div class="book" id="book"><div class="empty">Waiting for depth…</div></div>
+    </div>
+  </aside>
+</div>
+
+<main class="journal" id="jView" hidden>
+  <div class="wrap">
+    <div class="jhead">
+      <div><span class="lbl" id="jRun">Run 1</span><h1 class="disp">Journal.</h1></div>
+      <div class="jacts"><button class="btn sm ghost" id="csv" type="button">Export CSV</button><button class="btn sm ghost" id="newRun" type="button">End run, start fresh</button></div>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="frame jchart"><div class="lbl" style="padding:14px 16px 0">Account value, sampled every minute the app is open</div><div id="curve"></div></div>
+
+    <div class="jgrid">
+      <div class="frame jbox"><div class="lbl">What leverage did to you</div><div id="byLev"></div></div>
+      <div class="frame jbox"><div class="lbl">By market</div><div id="byMkt"></div></div>
+      <div class="frame jbox"><div class="lbl">Your tells · from the tags you add below</div><div id="byTag"></div></div>
+    </div>
+
+    <div class="frame jlog">
+      <div class="tabs"><button class="on" type="button">Closed trades</button></div>
+      <div id="log"></div>
+    </div>
+
+    <div class="frame jlog" id="runsBox" hidden>
+      <div class="tabs"><button class="on" type="button">Past runs</button></div>
+      <div id="runs"></div>
+    </div>
+  </div>
+</main>
+<main class="journal" id="rwView" hidden>
+  <div class="wrap">
+    <div class="jhead">
+      <div><span class="lbl">Real candles · sped up · separate 50,000 aUSD</span><h1 class="disp">Rewind.</h1></div>
+      <p class="jlead">Pick a market and one of its wildest days of the last two weeks. The day replays from midnight UTC in real 5-minute candles, with that day's real funding, on the same engine as the live app.</p>
+    </div>
+    <div class="frame rw-setup" id="rwSetup">
+      <div class="field"><div class="lbl"><span>Market</span></div><div class="chipset" id="rwMk"></div></div>
+      <div class="field"><div class="lbl"><span>Day · the wildest of the last two weeks</span></div><div class="rwdays" id="rwDays"></div></div>
+      <div class="field"><div class="lbl"><span>Speed</span></div><div class="chipset" id="rwSpeed"><button type="button" data-x="1">1 candle a second</button><button type="button" data-x="3" class="on">3 a second</button><button type="button" data-x="10">10 a second</button></div></div>
+      <button class="btn" id="rwStart" type="button" style="margin-top:18px">Start the day</button>
+      <div class="err" id="rwMsg" style="border:0;padding:0"></div>
+    </div>
+    <div id="rwPlay" hidden>
+      <div class="frame rw-bar"><b class="disp" id="rwTitle"></b><span class="mono" id="rwClock"></span><span class="mono" id="rwMark"></span>
+        <div class="rw-prog"><i id="rwProg"></i></div>
+        <button class="mini" id="rwPause" type="button">Pause</button><button class="mini" id="rwQuit" type="button">End the day here</button></div>
+      <div class="rw-grid">
+        <div class="frame rw-chart"><div id="rwChart"></div></div>
+        <div class="frame rw-side">
+          <span class="lbl">Rewind account</span><b class="rw-eq" id="rwEq"></b><span class="lbl" id="rwRet"></span>
+          <div class="rw-pos" id="rwPos"></div>
+          <div class="field"><div class="lbl"><span>Margin</span><span>aUSD</span></div><div class="inp"><input id="rwMargin" type="number" min="10" value="2000" inputmode="decimal"><span>aUSD</span></div></div>
+          <div class="field"><div class="lbl"><span>Leverage</span><span id="rwLevOut">10x</span></div><input id="rwLev" type="range" min="1" max="40" value="10"></div>
+          <div class="rw-btns"><button class="go" id="rwLong" type="button">▲ Long</button><button class="go short" id="rwShort" type="button">▼ Short</button></div>
+          <button class="btn ghost" id="rwClose" type="button" style="width:100%;margin-top:8px">Close position</button>
+          <div class="rw-log mono" id="rwLog"></div>
+        </div>
+      </div>
+    </div>
+    <div class="frame rw-end" id="rwEnd" hidden><div id="rwSum"></div>
+      <div class="acts"><button class="btn sm" id="rwAgain" type="button">Rewind another day</button><a class="btn sm ghost" id="rwShare" target="_blank" rel="noopener">Post on X</a></div></div>
+    <div class="frame jlog"><div class="tabs"><button class="on" type="button">Your rewinds</button></div><div id="rwHist"></div></div>
+  </div>
+</main>
+
+<main class="journal" id="mView" hidden>
+  <div class="wrap">
+    <div class="jhead">
+      <div><span class="lbl" id="mwSnap">Hyperliquid accounts · live</span><h1 class="disp">Mirror.</h1></div>
+      <p class="jlead">Every Hyperliquid account is public. Open one of the month's biggest winners, or paste any address, and see its live positions, liquidation prices and latest trades. Mirror a position onto your paper account with one click; Aven tells you when the account you're watching moves.</p>
+    </div>
+    <div class="mw-grid">
+      <div class="frame mw-side">
+        <form class="inp" id="mwForm" autocomplete="off"><input id="mwAddr" placeholder="paste a 0x… Hyperliquid address" spellcheck="false"><button class="btn sm" type="submit">Open</button></form>
+        <div class="mw-list" id="mwList"></div>
+      </div>
+      <div class="mw-main">
+        <div class="frame mw-head" id="mwHead"></div>
+        <div class="frame jlog"><div class="tabs"><button class="on" type="button">Live positions</button><span class="mw-copy"><span class="lbl">Mirror with</span><input id="mwMargin" type="number" value="500" min="10" inputmode="decimal"><span class="lbl">aUSD margin</span></span></div><div id="mwPos"></div></div>
+        <div class="frame jlog"><div class="tabs"><button class="on" type="button">Latest trades</button></div><div id="mwFills"></div></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<main class="journal" id="fView" hidden>
+  <div class="wrap">
+    <div class="jhead">
+      <div><span class="lbl" id="fundAt">Hyperliquid · Binance · Bybit</span><h1 class="disp">Funding.</h1></div>
+      <p class="jlead">The same coin costs a different amount to hold on each venue. Live funding from Hyperliquid next to Binance and Bybit, in one unit: a year, and what 10,000 aUSD long pays or earns in a day.</p>
+    </div>
+    <div class="mtabs" id="fundSort"><button class="on" data-sort="abs">Biggest rate</button><button data-sort="spread">Biggest gap vs Binance</button><button data-sort="name">A to Z</button></div>
+    <div class="frame jlog" id="fundBoard"></div>
+  </div>
+</main>
+
+<div class="cmd" id="cmd" hidden>
+  <div class="frame cmdbox">
+    <div class="inp"><span class="mono">/</span><input id="cmdIn" placeholder="long btc 20x 1000   ·   short eth 10x 500 @2450   ·   close sol 50%" spellcheck="false" autocomplete="off"></div>
+    <div class="cmdprev mono" id="cmdPrev"></div>
+    <div class="cmdout" id="cmdOut"></div>
+    <div class="cmdhelp mono">
+      <span>long|short &lt;mkt&gt; &lt;lev&gt;x &lt;margin&gt; [@limit | stop &lt;px&gt;] [tp &lt;px&gt;] [sl &lt;px&gt;]</span>
+      <span>close &lt;mkt&gt; [25%|50%] · margin &lt;mkt&gt; +200 · tp|sl &lt;mkt&gt; &lt;px&gt; · cancel &lt;mkt|all&gt; · go &lt;mkt&gt;</span>
+      <span>Esc to close · ↑ for the last command</span>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="shareModal" hidden>
+  <div class="frame box">
+    <canvas id="card" width="1080" height="1350"></canvas>
+    <div class="acts">
+      <a class="btn sm" id="dl" download="aven-receipt.png">Download receipt</a>
+      <a class="btn sm ghost" id="tw" target="_blank" rel="noopener">Post on X</a>
+      <button class="btn sm ghost" id="closeShare" type="button">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="awayModal" hidden>
+  <div class="frame box">
+    <span class="lbl">While you were away · <span id="awayGap"></span></span>
+    <h3 class="disp" style="font-size:34px;margin:12px 0 16px">The market kept going.</h3>
+    <div class="out" id="awayList"></div>
+    <div class="acts"><button class="btn sm" id="awayOk" type="button">Got it</button></div>
+  </div>
+</div>
+
+<script src="/assets/vendor/lightweight-charts.js"></script>
+<script type="module" src="/assets/terminal.js"></script>
+</body>
+</html>
