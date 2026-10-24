@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Docs · Aven</title>
+<meta name="description" content="How Aven works: paper perpetuals for Robinhood Chain traders. Markets, orders, margin and liquidation, funding, away settlement, the command line, the journal and the roadmap.">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/assets/aven.css">
+</head>
+<body class="docs-page">
+<canvas id="field" aria-hidden="true" style="opacity:.22"></canvas>
+<header class="top">
+  <a class="brand" href="/"><img src="/assets/logo.svg" alt=""><b>AVEN</b></a>
+  <span class="lbl" style="margin-left:6px">Docs</span>
+  <nav class="nav"><a href="/">Home</a><a href="/trade/">Trade</a></nav>
+  <a class="xlink" href="https://x.com/aven_trade" target="_blank" rel="noopener" aria-label="Aven on X">𝕏</a>
+  <a class="btn sm" href="/trade/">Launch app <span class="arr">→</span></a>
+</header>
+
+<div class="docs wrap">
+  <aside class="toc" id="toc">
+    <span class="lbl">On this page</span>
+    <button data-go="overview">Overview</button>
+    <button data-go="start">Quick start</button>
+    <button data-go="markets">Markets</button>
+    <button data-go="stocks">RH stocks</button>
+    <button data-go="odds">Liquidation odds</button>
+    <button data-go="orders">Orders</button>
+    <button data-go="margin">Margin &amp; liquidation</button>
+    <button data-go="funding">Funding</button>
+    <button data-go="away">While you're away</button>
+    <button data-go="cli">Command line</button>
+    <button data-go="journal">Journal &amp; runs</button>
+    <button data-go="rewind">Rewind</button>
+    <button data-go="fundboard">Funding board</button>
+    <button data-go="stress">Stress test</button>
+    <button data-go="mirror">Mirror</button>
+    <button data-go="whales">Whale tape</button>
+    <button data-go="data">Data sources</button>
+    <button data-go="roadmap">What's next</button>
+    <button data-go="rules">Rules</button>
+    <button data-go="faq">FAQ</button>
+  </aside>
+
+  <article class="doc">
+    <section id="overview">
+      <span class="lbl">Aven docs</span>
+      <h1 class="disp">How Aven works.</h1>
+      <p class="lead">Aven is a perpetuals exchange for Robinhood Chain traders. For now it runs on paper money: every price, funding payment and liquidation follows the real market, and the money is not real.</p>
+      <div class="callout"><b>There is nothing to sign up for.</b> No login, no top-up, no wallet, no keys. You open the app and you have 50,000 paper aUSD. Anyone asking you to deposit funds or share a key for Aven is not Aven.</div>
+    </section>
+
+    <section id="start">
+      <h2 class="disp">Quick start</h2>
+      <ol class="steps-doc">
+        <li>Open <a class="ul" href="/trade/">aventrade.app/trade</a>. A fresh run starts with 50,000 aUSD.</li>
+        <li>Pick a market on the left. Choose Market, Limit or Stop, then Long or Short.</li>
+        <li>Enter your margin and leverage. The ticket shows size, fee, liquidation price and how far away it is.</li>
+        <li>Send it. The position appears below the chart with live PnL, funding and a bar showing how close liquidation is.</li>
+        <li>Or skip the clicks: press <kbd>/</kbd> and type <code>long btc 20x 1000</code>.</li>
+        <li>Open the Journal tab to see every closed trade, tag it, and track your account value.</li>
+      </ol>
+    </section>
+
+    <section id="markets">
+      <h2 class="disp">Markets</h2>
+      <p>Twenty-nine markets in three groups. <b>Crypto</b> and <b>Macro</b> are read live from Hyperliquid (macro from its HIP-3 <code>xyz</code> markets): mark, funding and leverage caps are Hyperliquid's. <b>Stocks</b> are the thirteen official stock tokens on Robinhood Chain, priced from their own pools on-chain.</p>
+      <div class="frame tblwrap"><table class="tbl" id="mkTable"><tr><th>Market</th><th>Group</th><th>Mark</th><th>Funding / h</th><th>Max leverage</th></tr></table></div>
+    </section>
+
+    <section id="stocks">
+      <h2 class="disp">Robinhood Chain stocks</h2>
+      <p>NVDA, TSLA, AAPL, META, GOOGL, AMZN, MSFT, AMD, COIN, PLTR, MSTR, SPY and QQQ: the official tokens, from a fixed list of addresses (look-alike contracts with similar addresses exist).</p>
+      <ul class="dl">
+        <li><b>Mark</b>: every 3 seconds Aven reads each token's deepest pool on Robinhood Chain through a public RPC: <code>slot0()</code> and <code>liquidity()</code> on Uniswap v3 and SushiSwap v3 pools, <code>extsload()</code> on the Uniswap v4 PoolManager for v4 pools. The pool's sqrt price becomes a dollar price through the WETH/USDG pool, or through the SPY token for SPY-quoted pools.</li>
+        <li><b>Fill</b>: a market order is quoted with Uniswap's swap maths on the pool's active liquidity, LP fee included, so a bigger order fills worse, the way a real swap would. An order that would move the pool more than 1.5% is refused, since it would run past the active range.</li>
+        <li><b>Leverage</b>: up to 5x. <b>Funding</b>: none, these are spot tokens. <b>Candles</b>: GeckoTerminal's index of the same pool.</li>
+        <li><b>Wall St</b>: the bar shows the underlying stock's last trade and whether the US market is open (Yahoo Finance, read through Shuntdesk). The tokens trade on-chain around the clock, so they can drift from it while the market is closed.</li>
+      </ul>
+    </section>
+
+    <section id="odds">
+      <h2 class="disp">Liquidation odds</h2>
+      <p>Each open position, and the ticket before you send one, shows the chance that the mark touches the liquidation price within 24 hours. It comes from that market's own hourly volatility over the last three days, as the touch probability of a driftless random walk: 2 × (1 − Φ(d ÷ (σ√24))), with d the log distance to the liquidation price. It is a statistic, not a forecast: real markets have fat tails, so real touches happen more often than this says.</p>
+    </section>
+
+    <section id="orders">
+      <h2 class="disp">Orders</h2>
+      <table class="tbl doc-tbl">
+        <tr><th>Type</th><th>Fills</th><th>Fee</th></tr>
+        <tr><td>Market</td><td>Immediately at the current mark</td><td>Taker 0.05%</td></tr>
+        <tr><td>Limit</td><td>Rests until a real trade reaches your price; fills at your price. A long limit must sit below the mark, a short above.</td><td>Maker 0.02%</td></tr>
+        <tr><td>Stop</td><td>Triggers when the mark crosses your price; fills at that price</td><td>Taker 0.05%</td></tr>
+        <tr><td>Reduce only</td><td>Can only shrink or close an existing position on the other side, never open or flip</td><td>Same as its type</td></tr>
+        <tr><td>Take profit / stop loss</td><td>Attached to the position, triggered on the mark, closes all of it</td><td>Taker 0.05%</td></tr>
+      </table>
+      <p>Resting orders hold their margin and fee from your free balance until they fill or you cancel them. Minimum order size is 10 aUSD of notional.</p>
+      <p><b>One position per market.</b> A second order on the same side adds to the position and averages the entry. An order on the opposite side reduces it, closes it, or, if it is bigger, closes it and opens the remainder the other way.</p>
+    </section>
+
+    <section id="margin">
+      <h2 class="disp">Margin &amp; liquidation</h2>
+      <p>Margin is isolated per market: one position can only lose the margin you gave it. Leverage is size ÷ margin, capped at the market's maximum.</p>
+      <div class="formula mono">liquidation = (entry × qty × d − margin) ÷ (qty × (d − 0.005))<br><span>d = +1 for a long, −1 for a short · 0.005 = maintenance margin</span></div>
+      <p>In words: you are liquidated when margin plus unrealised PnL falls to 0.5% of the position's value at the mark. When that happens the position closes at the liquidation price and its margin is gone. Funding paid out of margin moves the liquidation price closer; adding margin with <b>± Margin</b> moves it away.</p>
+    </section>
+
+    <section id="funding">
+      <h2 class="disp">Funding</h2>
+      <p>Funding settles every hour, on the hour, at Hyperliquid's live rate for that market. Payment = position value at the mark × hourly rate. When the rate is positive, longs pay shorts; when it is negative, shorts pay longs. Payments come out of (or go into) the position's margin and show in the Funding column and on the receipt.</p>
+    </section>
+
+    <section id="away">
+      <h2 class="disp">While you're away</h2>
+      <p>Your account lives in your browser, so nothing runs while every Aven tab is closed. When you come back, Aven fetches what you missed for every market where you had a position or an order, and replays it in time order:</p>
+      <ul class="dl">
+        <li>1-minute candles for absences up to about 25 hours, 5-minute up to about 5 days, hourly beyond that</li>
+        <li>The real hourly funding history</li>
+        <li>Each candle's high and low checked against resting orders, stops, take profits and liquidation prices</li>
+      </ul>
+      <p>A popup lists what happened. Hyperliquid does not publish mark-price candles, so the replay uses trade candles for both; the live app uses the real mark.</p>
+    </section>
+
+    <section id="cli">
+      <h2 class="disp">Command line</h2>
+      <p>Press <kbd>/</kbd> or <kbd>Ctrl</kbd>+<kbd>K</kbd> anywhere in the app. As you type, a preview line shows what the command will do (size, fill, liquidation price). After Enter, the result is printed under it: the fill price, size, liquidation price and its odds, fees, or the reason it was refused; the last six commands stay listed. Market names are case-insensitive; <code>gold</code>, <code>xau</code>, <code>oil</code>, <code>wti</code> and <code>pepe</code> all work. <kbd>↑</kbd> recalls the last command.</p>
+      <table class="tbl doc-tbl mono">
+        <tr><th>Command</th><th>Does</th></tr>
+        <tr><td>long btc 20x 1000</td><td>Market long, 1,000 aUSD margin at 20x (20,000 size)</td></tr>
+        <tr><td>short eth 10x 500 @2450</td><td>Limit short resting at 2,450</td></tr>
+        <tr><td>long sol 5x 300 stop 105</td><td>Stop long that triggers when the mark reaches 105</td></tr>
+        <tr><td>long btc 20x 1000 tp 83000 sl 79000</td><td>Market long with a take profit and a stop loss</td></tr>
+        <tr><td>short btc 20x 500 reduce</td><td>Reduce-only: only shrinks an open long</td></tr>
+        <tr><td>close btc · close btc 50%</td><td>Close all, or part, at the mark</td></tr>
+        <tr><td>margin btc +200 · margin btc -100</td><td>Add or pull margin</td></tr>
+        <tr><td>tp btc 83000 · sl btc 79000</td><td>Set a take profit or stop loss on an open position</td></tr>
+        <tr><td>cancel eth · cancel all</td><td>Cancel resting orders</td></tr>
+        <tr><td>go hype</td><td>Switch the chart and ticket to a market</td></tr>
+        <tr><td>pair long nvda short qqq 1000 3x</td><td>Pair trade: both legs at once, 1,000 aUSD margin each, tracked together with one combined PnL</td></tr>
+        <tr><td>close pair · close pair 12</td><td>Close both legs of every pair, or of pair #12</td></tr>
+        <tr><td>alert btc above 82000 · alert nvda 200</td><td>Price alert on the mark; without above/below the direction is taken from where the mark is now. Fires a toast and a browser notification if you allow it</td></tr>
+        <tr><td>alerts clear</td><td>Remove every alert</td></tr>
+      </table>
+      <p>Leaving out the leverage uses 10x (or the market's maximum if lower). You can try every command in the sandbox on the <a class="ul" href="/">home page</a>.</p>
+    </section>
+
+    <section id="journal">
+      <h2 class="disp">Journal &amp; runs</h2>
+      <p>The Journal tab in the app logs every closed position with entry, exit, price PnL, fees, funding and the net result. It shows win rate, profit factor, average win and loss, liquidations, an equity curve sampled every minute the app is open, and breakdowns by leverage and by market.</p>
+      <p>Tag each trade (<code>plan</code>, <code>fomo</code>, <code>revenge</code>, <code>scalp</code>, <code>hedge</code>, <code>news</code>) and write a short note; the journal then shows the net result per tag. Export everything as CSV.</p>
+      <p>A <b>run</b> is one 50,000 aUSD account. <b>End run, start fresh</b> archives it with its final value and starts the next run; open positions and orders are dropped.</p>
+      <p><b>Receipts</b>: any position or closed trade can be printed as a receipt image (1080 × 1350) to download or post.</p>
+    </section>
+
+    <section id="rewind">
+      <h2 class="disp">Rewind</h2>
+      <p>The Rewind tab replays a real day. Pick a Hyperliquid market (crypto or macro) and one of its six widest-range days of the last two weeks; the day plays from midnight UTC in its real 5-minute candles, at 1, 3 or 10 candles a second, with that day's real hourly funding.</p>
+      <p>It runs on a separate 50,000 aUSD account with the same engine as the live app: fees, liquidations on each candle's high and low, funding at each hour. Trade it with Long, Short and Close. End the day early or let it run to 24:00 UTC; open positions close at the last price. Results are kept in this browser under Your rewinds. Two weeks is as far back as Hyperliquid keeps 5-minute candles.</p>
+    </section>
+
+    <section id="fundboard">
+      <h2 class="disp">Funding board</h2>
+      <p>The Funding tab puts each Hyperliquid market's live funding next to Binance's and Bybit's for the same coin, from Hyperliquid's own cross-venue feed. Every rate is converted to the same units: per hour, per year, and what a 10,000 aUSD long pays or earns in a day at Hyperliquid's rate. <b>Gap vs Binance</b> is Hyperliquid's yearly rate minus Binance's, in percentage points. Positive rates mean longs pay shorts.</p>
+    </section>
+
+    <section id="stress">
+      <h2 class="disp">Stress test</h2>
+      <p>In the Positions tab, <b>Stress test</b> takes the worst real hour each market had in the last 90 days (about 40 for Robinhood Chain stocks, as far as their hourly candles go): the deepest open-to-low hour for a long, the highest open-to-high hour for a short. It applies that move to the current mark and tells you whether each position survives it and what it would cost.</p>
+    </section>
+
+    <section id="mirror">
+      <h2 class="disp">Mirror</h2>
+      <p>Every Hyperliquid account is public. The Mirror tab opens any account: its live account value, every open position with size, entry, liquidation price and unrealised PnL, and its latest trades, read straight from Hyperliquid and refreshed every 15 seconds. While you watch an account, Aven tells you when it opens, flips or closes a position.</p>
+      <p>The list on the left is the top 20 accounts by 30-day PnL (over $1M in the account and $10M of 30-day volume) from Hyperliquid's public leaderboard; the list itself is a dated snapshot, their positions are always live. <b>Mirror on paper</b> opens the same side on your account with the margin you choose, at their leverage or the market's cap, whichever is lower. Markets Aven doesn't list can be watched but not mirrored.</p>
+    </section>
+
+    <section id="whales">
+      <h2 class="disp">Whale tape</h2>
+      <p>Aven listens to every trade on its sixteen markets. Prints of $50,000 or more appear in the Whale tape tab and on the home page as they happen, and each one sends a shockwave through the dotted field in the background: buys on one side of the valley, sells on the other.</p>
+    </section>
+
+    <section id="data">
+      <h2 class="disp">Data sources</h2>
+      <ul class="dl">
+        <li><b>Hyperliquid public API</b> (api.hyperliquid.xyz): mark, oracle and mid prices, hourly funding and its history, open interest, 24h stats, the order book, candles and trades. Your browser connects directly; no key.</li>
+        <li><b>Robinhood Chain</b> public RPC (robinhood-rpc.publicnode.com): stock token pool state every 3 seconds and the latest block.</li>
+        <li><b>GeckoTerminal</b>: candles for the stock token pools. <b>DexScreener</b>: 24h change, volume and pool liquidity for the stock tokens.</li>
+        <li><b>Hyperliquid accounts</b> (clearinghouseState, userFills): live positions and trades for Mirror. <b>Hyperliquid leaderboard</b>: the dated top-20 snapshot.</li>
+        <li><b>Shuntdesk</b> (shuntdesk.com/api/v1/stocks): the underlying stocks' last trade and market session, from Yahoo Finance.</li>
+        <li><b>Your browser's storage</b>: your account, orders, trades, tags and notes. Nothing is sent to an Aven server; there isn't one.</li>
+      </ul>
+    </section>
+
+    <section id="roadmap">
+      <h2 class="disp">What's next</h2>
+      <div class="phases">
+        <div class="frame phase now"><span class="lbl">Today · live</span><h3 class="disp">Paper</h3><ul><li>Paper perpetuals on the live mark</li><li>Real funding, real liquidations, away settlement</li><li>Command line, journal, receipts, whale tape</li></ul></div>
+        <div class="frame phase"><span class="lbl">Later · coming in the future</span><h3 class="disp">Real money</h3><ul><li>Real-money perpetuals on Robinhood Chain</li><li>No date yet; nothing to deposit today</li></ul></div>
+      </div>
+    </section>
+
+    <section id="rules">
+      <h2 class="disp">Rules</h2>
+      <table class="tbl doc-tbl">
+        <tr><th>Rule</th><th>Value</th></tr>
+        <tr><td>Starting balance, each run</td><td>50,000 aUSD (paper, no value)</td></tr>
+        <tr><td>Max leverage</td><td>Hyperliquid's cap per market (10x to 40x); 5x on Robinhood Chain stocks</td></tr>
+        <tr><td>Fees</td><td>Taker 0.05%, maker 0.02%, on notional</td></tr>
+        <tr><td>Maintenance margin</td><td>0.5% of notional at the mark</td></tr>
+        <tr><td>Funding</td><td>Live hourly rate, settled each hour; none on stock tokens</td></tr>
+        <tr><td>Triggers</td><td>Liquidation, stops, take profits on the mark; limits on trades</td></tr>
+        <tr><td>Margin mode</td><td>Isolated, one netted position per market</td></tr>
+        <tr><td>Slippage</td><td>Hyperliquid markets fill at the mark; stock tokens fill at the pool's swap quote (impact + LP fee), max 1.5%</td></tr>
+        <tr><td>Account storage</td><td>This browser only</td></tr>
+      </table>
+    </section>
+
+    <section id="faq">
+      <h2 class="disp">FAQ</h2>
+      <div class="faq">
+        <details><summary>Do I need an account, a wallet or a key?</summary><p>No. There is no login, no top-up, no wallet connection and no key of any kind. Open the app and trade.</p></details>
+        <details><summary>Is aUSD worth anything?</summary><p>No. It's a number in your browser. It can't be bought, sold, withdrawn or transferred.</p></details>
+        <details><summary>When does real money come?</summary><p>Real-money trading on Robinhood Chain is coming in the future. There is no date yet.</p></details>
+        <details><summary>Why did my limit order not fill when the chart touched it?</summary><p>Limits fill when a real trade reaches your price. The chart shows candles from trades too, so a wick that only touches your price can go either way; Aven needs the trade price to reach it.</p></details>
+        <details><summary>Can I use it on my phone?</summary><p>Yes. The app, the command line and the journal all work on a phone browser. Your phone keeps its own separate account.</p></details>
+        <details><summary>I cleared my browser and my trades are gone.</summary><p>The account lives only in browser storage. Export the journal as CSV if you want a copy.</p></details>
+        <details><summary>Is this financial advice?</summary><p>No. Aven is a simulator. Real venues have slippage, liquidation penalties and real losses.</p></details>
+      </div>
+    </section>
+
+    <section class="doc-end">
+      <p>Updates and announcements: <a class="ul" href="https://x.com/aven_trade" target="_blank" rel="noopener">@aven_trade on X</a>.</p>
+      <p class="lbl">Aven is an independent project, not affiliated with Robinhood Markets, Inc. or Hyperliquid.</p>
+    </section>
+  </article>
+</div>
+
+<script type="module" src="/assets/docs.js"></script>
+</body>
+</html>

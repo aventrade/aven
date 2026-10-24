@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aven — paper perpetuals on Robinhood Chain</title>
+<meta name="description" content="Paper perpetuals for Robinhood Chain traders: the live Hyperliquid mark, real hourly funding and real liquidations, with 50,000 aUSD of paper money. No login, no top-up, no wallet, no keys.">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/assets/aven.css">
+</head>
+<body class="landing">
+<canvas id="field" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="top">
+  <a class="brand" href="/"><img src="/assets/logo.svg" alt=""><b>AVEN</b></a>
+  <nav class="nav">
+    <button data-go="markets">Markets</button><button data-go="how">How it works</button><button data-go="cli">Command line</button><button data-go="whales">Whale tape</button><a href="/docs/">Docs</a>
+  </nav>
+  <a class="xlink" href="https://x.com/aven_trade" target="_blank" rel="noopener" aria-label="Aven on X">𝕏</a>
+  <a class="btn sm launch" href="/trade/">Launch app <span class="arr">→</span></a>
+  <button class="burger" id="burger" type="button" aria-label="Menu" aria-expanded="false"><i></i><i></i></button>
+</header>
+<div class="mnav" id="mnav" hidden>
+  <button data-go="markets">Markets</button><button data-go="how">How it works</button><button data-go="cli">Command line</button><button data-go="whales">Whale tape</button><button data-go="roadmap">What's next</button>
+  <a href="/docs/">Docs</a><a href="https://x.com/aven_trade" target="_blank" rel="noopener">X · @aven_trade</a>
+  <a class="btn" href="/trade/">Launch app <span class="arr">→</span></a>
+</div>
+
+<main>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-main">
+        <span class="lbl idx"><span class="live-dot"></span>Live mark · paper money · for Robinhood Chain</span>
+        <h1 class="disp split">Long or short.<br><span class="out">On paper.</span></h1>
+        <p class="sub reveal">Perpetuals for Robinhood Chain traders, running on paper money for now. Real Hyperliquid prices, real hourly funding, real liquidations, and 50,000 aUSD that isn't worth a cent. No login. No top-up. No wallet.</p>
+        <div class="ctas reveal">
+          <a class="btn" href="/trade/">Start with 50,000 paper aUSD <span class="arr">→</span></a>
+          <button class="btn ghost" data-go="cli">Try the command line</button>
+        </div>
+      </div>
+      <aside class="frame ticket reveal">
+        <div class="lbl">BTC-PERP · live mark</div>
+        <div class="big mono" data-px="BTC"></div>
+        <div class="chg" data-chg="BTC"></div>
+        <div style="margin-top:14px">
+          <div class="row"><span class="lbl">Oracle</span><span data-ix="BTC"></span></div>
+          <div class="row"><span class="lbl">Funding, 1h</span><span data-fr="BTC"></span></div>
+          <div class="row"><span class="lbl">Open interest</span><span data-oi="BTC"></span></div>
+          <div class="row"><span class="lbl">Robinhood Chain block</span><span id="rhBlock"></span></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <div class="marquee" aria-hidden="true"><div class="track" id="tape"></div></div>
+
+  <section class="nos">
+    <div class="wrap">
+      <div class="nogrid">
+        <div class="no reveal"><span class="x">×</span><b class="disp">No login</b><span>No email, no account, no password.</span></div>
+        <div class="no reveal"><span class="x">×</span><b class="disp">No top-up</b><span>Nothing to deposit. Not a cent.</span></div>
+        <div class="no reveal"><span class="x">×</span><b class="disp">No wallet</b><span>Nothing to connect, nothing to sign.</span></div>
+        <div class="no reveal"><span class="x">×</span><b class="disp">No keys</b><span>No seed phrase, no private key, no API key.</span></div>
+        <div class="no yes reveal"><span class="x">✓</span><b class="disp">Just paper</b><span>50,000 aUSD of paper money, live prices, open the app and trade.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="markets">
+    <div class="wrap">
+      <div class="head">
+        <div><span class="lbl idx">01 / Markets</span><h2 class="disp split">Twenty-nine markets.<br>Crypto, macro, stocks.</h2></div>
+        <p class="reveal">Crypto and macro run on Hyperliquid's live mark and funding. The thirteen stock tokens on Robinhood Chain are priced straight from their pools on-chain, read every three seconds, and fill at what a real swap of your size would get.</p>
+      </div>
+      <div class="mtabs" id="mtabs"><button class="on" data-g="Crypto">Crypto</button><button data-g="Stocks">RH stocks</button><button data-g="Macro">Macro</button></div>
+      <div class="markets reveal" id="mkGrid"></div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="wrap">
+      <div class="head">
+        <div><span class="lbl idx">02 / How it works</span><h2 class="disp split">Open it.<br>Trade it. Live with it.</h2></div>
+        <p class="reveal">From the first click to your first liquidation in five steps. Nothing to sign up for along the way.</p>
+      </div>
+      <ol class="how">
+        <li class="frame reveal"><span class="n">01</span><div><h3 class="disp">Open the app</h3><p>Go to <b>aventrade.app/trade</b>. Your browser gets a fresh run with 50,000 paper aUSD. That's the whole onboarding.</p></div><div class="viz viz1"><span>50,000.00</span><i>aUSD · run 1</i></div></li>
+        <li class="frame reveal"><span class="n">02</span><div><h3 class="disp">Pick a market and an order</h3><p>Twenty-nine markets. Market orders fill at the mark (stock tokens at a live pool quote), limits rest until trades reach them, stops trigger on the mark.</p></div><div class="viz viz2"><span class="on">Market</span><span>Limit</span><span>Stop</span></div></li>
+        <li class="frame reveal"><span class="n">03</span><div><h3 class="disp">Size the risk</h3><p>Margin × leverage is your size. Before you send it, the ticket shows the fee, the liquidation price and how much room you have.</p></div><div class="viz viz3"><i style="--w:72%"></i><span>liq. 4.88% away</span></div></li>
+        <li class="frame reveal"><span class="n">04</span><div><h3 class="disp">The market moves</h3><p>Funding is paid every hour from your margin. Stops, targets and liquidations fire on the mark, even with the tab closed: Aven replays what you missed.</p></div><div class="viz viz4"><span>14:00</span><span>funding −0.24</span><span>15:12</span><span>stop loss</span></div></li>
+        <li class="frame reveal"><span class="n">05</span><div><h3 class="disp">Read the receipt</h3><p>Every trade lands in the journal with fees and funding. Tag the habits, share the receipt, or end the run and start again at 50,000.</p></div><div class="viz viz5"><span>#plan</span><span class="on">#fomo</span><span>#revenge</span></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="perp">
+    <div class="wrap">
+      <div class="head">
+        <div><span class="lbl idx">03 / Why it's real</span><h2 class="disp split">Fake money.<br>Real mechanics.</h2></div>
+        <p class="reveal">Most paper trading skips the parts that actually hurt. Aven keeps them.</p>
+      </div>
+      <div class="feats four">
+        <div class="frame feat reveal"><div class="glyph"></div><span class="lbl">Mark &amp; funding</span><h3 class="disp">The real mark</h3><p>PnL and liquidations run on the mark price, not the last trade. Funding is the live hourly rate, paid out of your margin at the top of each hour.</p></div>
+        <div class="frame feat reveal"><div class="glyph"></div><span class="lbl">Orders</span><h3 class="disp">Limit, stop, reduce</h3><p>Market, resting limit (maker fee) and stop orders, reduce-only, take profit and stop loss, partial closes, add or pull margin.</p></div>
+        <div class="frame feat reveal"><div class="glyph"></div><span class="lbl">Rewind</span><h3 class="disp">Trade a real day again</h3><p>Pick one of the wildest days of the last two weeks and it replays in real 5-minute candles, sped up, with that day's funding. Same engine, separate account.</p></div>
+        <div class="frame feat reveal"><div class="glyph"></div><span class="lbl">Stress test</span><h3 class="disp">The worst hour, now</h3><p>Your open positions against the worst real hour each market had in 90 days. Survive it or get told the cost, before it happens for real.</p></div>
+        <div class="frame feat reveal"><div class="glyph"></div><span class="lbl">Funding board</span><h3 class="disp">Who pays more</h3><p>Hyperliquid's live funding next to Binance and Bybit for the same coin, in one unit: a year, and a day on 10,000 aUSD.</p></div>
+        <div class="frame feat reveal"><div class="glyph"></div><span class="lbl">Mirror</span><h3 class="disp">Copy a whale</h3><p>Open any Hyperliquid account, or one of the month's biggest winners, and see its live positions and liquidation prices. Mirror one onto your paper account in a click.</p></div>
+        <div class="frame feat reveal"><div class="glyph"></div><span class="lbl">Away settlement</span><h3 class="disp">It doesn't wait</h3><p>Close the tab and the market keeps going. When you come back, Aven replays every minute you missed: fills, stops, funding, liquidations, in order.</p></div>
+        <div class="frame feat reveal"><div class="glyph"></div><span class="lbl">Robinhood Chain stocks</span><h3 class="disp">Priced on-chain</h3><p>NVDA, TSLA, AAPL and ten more stock tokens, read from their Uniswap pools on Robinhood Chain. Your fill includes the real price impact and LP fee of a swap that size.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="cli">
+    <div class="wrap">
+      <div class="head">
+        <div><span class="lbl idx">04 / Command line</span><h2 class="disp split">Type the trade.<br>Skip the clicks.</h2></div>
+        <p class="reveal">This one is live. Click a command or type your own: it runs on a sandbox account against the real mark, right here. The sandbox is thrown away when you leave.</p>
+      </div>
+      <div class="cli reveal">
+        <div class="frame cli-term">
+          <div class="td-bar"><span></span><span></span><span></span><b class="lbl">aven · sandbox · <span id="cliBal">50,000.00</span> aUSD</b><b class="lbl" id="cliMode" style="margin-left:auto">autoplay</b></div>
+          <div class="cli-out mono" id="cliOut"></div>
+          <form class="cli-in" id="cliForm" autocomplete="off"><span class="mono">/</span><input id="cliIn" placeholder="type here: long btc 20x 1000" spellcheck="false" autocapitalize="off"><button class="btn sm" type="submit">Run</button></form>
+        </div>
+        <div class="cli-side">
+          <div class="frame cli-pos"><div class="lbl">Sandbox position</div><div id="cliPos"><div class="empty">Nothing open yet.</div></div></div>
+          <div class="frame cli-chips"><div class="lbl">Try one</div><div class="chipset" id="cliChips"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="whales">
+    <div class="wrap">
+      <div class="head">
+        <div><span class="lbl idx">05 / Whale tape</span><h2 class="disp split">Somebody just<br>sent it. Live.</h2></div>
+        <p class="reveal">Every trade of $50K or more on these markets lands here as it prints, and drops a shockwave into the field behind this page.</p>
+      </div>
+      <div class="whale-grid">
+        <div class="frame whale-tot reveal"><span class="lbl">Big prints since you opened this page</span><b id="wTot">$0</b>
+          <div class="wsplit"><div><span class="lbl">Bought</span><b id="wBuy">$0</b></div><div><span class="lbl">Sold</span><b id="wSell">$0</b></div></div>
+          <div class="wbar"><i id="wBar" style="width:50%"></i></div></div>
+        <div class="frame whale-list reveal" id="wList"><div class="empty">Listening to every trade on the Hyperliquid markets…</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="size">
+    <div class="wrap">
+      <div class="head">
+        <div><span class="lbl idx">06 / Sizing</span><h2 class="disp split">Size it before<br>you send it.</h2></div>
+        <p class="reveal">The same maths as the app, on the live mark. Move the slider and watch the liquidation price walk toward you.</p>
+      </div>
+      <div class="sizer">
+        <div class="frame calc reveal">
+          <div class="seg syms" id="cSyms"></div>
+          <div class="seg" id="cSide"><button data-side="long" class="on">▲ Long</button><button data-side="short">▼ Short</button></div>
+          <div class="field"><div class="lbl"><span>Margin</span><span>aUSD</span></div>
+            <div class="inp"><input id="cMargin" type="number" min="10" step="10" value="1000" inputmode="decimal"><span>aUSD</span></div></div>
+          <div class="field"><div class="lbl"><span>Leverage</span><span id="cLevOut">10x</span></div>
+            <input id="cLev" type="range" min="1" max="40" step="1" value="10"></div>
+          <a class="btn" style="width:100%;margin-top:22px" id="cGo" href="/trade/">Open this in the app <span class="arr">→</span></a>
+        </div>
+        <div class="frame calc reveal">
+          <div class="lbl">Position preview · live mark</div>
+          <div class="out" id="cOut"></div>
+          <div class="health"><div class="gauge" id="cGauge" style="--h:50"></div><div><span class="lbl">Room before liquidation</span><b id="cRoom"></b></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="roadmap">
+    <div class="wrap">
+      <div class="head">
+        <div><span class="lbl idx">07 / What's next</span><h2 class="disp split">Paper today.<br>Real money later.</h2></div>
+        <p class="reveal">Paper comes first so the engine gets tested in public, by real traders on real prices, before anything real is at stake.</p>
+      </div>
+      <div class="phases">
+        <div class="frame phase now reveal"><span class="lbl">Today · live</span><h3 class="disp">Paper</h3><ul><li>Perpetuals on the live Hyperliquid mark</li><li>Real funding, real liquidations</li><li>Command line, journal, receipts, alerts, pair trades</li><li>Rewind real days, funding board, stress test</li><li>Mirror any Hyperliquid whale on paper</li><li>No login, no top-up, no wallet, no keys</li></ul></div>
+        <div class="frame phase reveal"><span class="lbl">Later · coming in the future</span><h3 class="disp">Real money</h3><ul><li>Real-money perpetuals on Robinhood Chain</li><li>No date yet, and nothing to deposit today</li><li>Anyone asking you to send funds for Aven is not us</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <div class="head"><div><span class="lbl idx">08 / FAQ</span><h2 class="disp split">Questions.</h2></div><p class="reveal">The short version. The full rules and the command reference live in the <a href="/docs/" class="ul">docs</a>.</p></div>
+      <div class="faq frame reveal">
+        <details><summary>Is any of this real money?</summary><p>No. aUSD is a number in your browser. You can't deposit it, withdraw it or buy it. There is no login, no top-up and no wallet to connect.</p></details>
+        <details><summary>Will there be real money?</summary><p>Real-money trading on Robinhood Chain is coming in the future. There is no date yet and nothing to deposit today.</p></details>
+        <details><summary>Where do the prices come from?</summary><p>Crypto and macro: Hyperliquid's public API (mark, oracle, hourly funding, open interest, order book, trades). Stock tokens: their pools on Robinhood Chain, read through a public RPC every three seconds, with candles from GeckoTerminal. Your browser connects to all of it directly.</p></details>
+        <details><summary>What happens while I'm away?</summary><p>When you come back, Aven fetches the candles and funding history you missed and replays them in order, so stops, fills, funding and liquidations land when they would have.</p></details>
+        <details><summary>Is my account saved?</summary><p>In this browser only. Clearing site data or switching devices starts you over. The journal can export your trades as CSV.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="end">
+    <div class="wrap">
+      <h2 class="disp split">Get liquidated<br>for free.</h2>
+      <a class="btn" href="/trade/">Launch app <span class="arr">→</span></a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Aven is a trading simulator built for Robinhood Chain. aUSD has no value and can't be bought, sold or withdrawn. Aven is an independent project, not affiliated with Robinhood Markets, Inc. or Hyperliquid. Market data from Hyperliquid's public API; chain data from a public Robinhood Chain RPC. Charts by <a href="https://www.tradingview.com/" class="ul">TradingView Lightweight Charts</a>. Nothing here is financial advice.</p>
+    <div class="links"><a href="/trade/">Trade</a><a href="/docs/">Docs</a><a href="https://x.com/aven_trade" target="_blank" rel="noopener">X · @aven_trade</a></div>
+    <div class="word" aria-hidden="true">AVEN</div>
+  </div>
+</footer>
+
+<script type="module" src="/assets/home.js"></script>
+</body>
+</html>
