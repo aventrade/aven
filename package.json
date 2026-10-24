@@ -1,0 +1,17 @@
+{
+  "name": "aven",
+  "version": "0.9.0",
+  "private": true,
+  "type": "module",
+  "description": "Paper perpetuals for Robinhood Chain traders: Hyperliquid's live mark and funding, Robinhood Chain stocks priced on-chain, real liquidations. No login, no wallet.",
+  "homepage": "https://aventrade.app",
+  "repository": { "type": "git", "url": "https://github.com/aventrade/aven.git" },
+  "bugs": { "url": "https://github.com/aventrade/aven/issues" },
+  "license": "MIT",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "node dev/serve.mjs",
+    "test": "node --test test/engine.test.mjs test/command.test.mjs test/pool-quote.test.mjs",
+    "deploy": "wrangler deploy"
+  }
+}
