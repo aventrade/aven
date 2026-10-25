@@ -422,7 +422,7 @@ function share(trip, sym) {
   drawReceipt($('card'), r, s.run);
   $('dl').href = $('card').toDataURL('image/png');
   const pct = (r.net / r.margin) * 100;
-  const text = `${r.side === 'long' ? 'Long' : 'Short'} ${r.sym} ${r.lev}x on @aven_trade: ${E.signed(pct, 1)}% on paper. Real mark, real funding, fake money.`;
+  const text = `${r.side === 'long' ? 'Long' : 'Short'} ${r.sym} ${r.lev}x on @aventrade_: ${E.signed(pct, 1)}% on paper. Real mark, real funding, fake money.`;
   $('tw').href = `https://x.com/intent/post?text=${encodeURIComponent(text)}`;
   $('shareModal').hidden = false;
 }

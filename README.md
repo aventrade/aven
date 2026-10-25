@@ -21,7 +21,7 @@
   <a href="docs/ROBINHOOD-STOCKS.md"><b>On-chain stock pricing</b></a> ·
   <a href="docs/COMMANDS.md"><b>Command line</b></a> ·
   <a href="CHANGELOG.md"><b>Changelog</b></a> ·
-  <a href="https://x.com/aven_trade"><b>X</b></a>
+  <a href="https://x.com/aventrade_"><b>X</b></a>
 </p>
 
 ---

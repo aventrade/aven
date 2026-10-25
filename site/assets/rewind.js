@@ -145,7 +145,7 @@ function finish(early = false) {
     <div class="rw-k"><div><span class="lbl">Start</span><b>${E.fmt(E.START, 0)}</b></div><div><span class="lbl">Finish</span><b>${E.fmt(final)}</b></div>
     <div><span class="lbl">Return</span><b>${Math.abs(ret) < 0.005 ? 'even' : E.signed(ret) + '%'}</b></div><div><span class="lbl">Trades</span><b>${st.n || 'none'}</b></div>
     ${best > -Infinity ? `<div><span class="lbl">Your best on this day</span><b>${E.fmt(Math.max(best, final))}</b></div>` : ''}</div>`;
-  const text = `Rewound ${R.sym} on ${dayLabel(R.day)} with @aven_trade: 50,000 → ${E.fmt(final, 0)} (${E.signed(ret, 1)}%). Real candles, paper money.`;
+  const text = `Rewound ${R.sym} on ${dayLabel(R.day)} with @aventrade_: 50,000 → ${E.fmt(final, 0)} (${E.signed(ret, 1)}%). Real candles, paper money.`;
   $('rwShare').href = `https://x.com/intent/post?text=${encodeURIComponent(text)}`;
   paintHistory();
 }
